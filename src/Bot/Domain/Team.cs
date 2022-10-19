@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Bot.Domain;
 
 public class Team
