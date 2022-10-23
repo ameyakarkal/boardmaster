@@ -1,3 +1,4 @@
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -11,6 +12,12 @@ namespace Bot
         {
             var host = new HostBuilder()
                 .ConfigureFunctionsWorkerDefaults()
+                .ConfigureAppConfiguration(conf =>
+                {
+                    conf.SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("local.settings.json", optional: false, reloadOnChange: true)
+                    .AddEnvironmentVariables();
+                })
                 .Build();
 
             host.Run();

@@ -21,14 +21,16 @@ adding azure function
 
 ```
 # install azure function cli tools
-# i had these pre installed follow these instructions
 
 # overwrites the project file created previously
 func init Bot --force
 
-# adding http webhook
 # figure out which templates are supported
 func templates list
+
+# adding http webhook
+func new --name NominateController --template "HTTP trigger"
+
 
 ```
 
