@@ -1,8 +1,6 @@
 using System.IO;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Azure.Functions.Worker.Configuration;
 
 namespace Bot
 {
@@ -15,8 +13,8 @@ namespace Bot
                 .ConfigureAppConfiguration(conf =>
                 {
                     conf.SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("local.settings.json", optional: false, reloadOnChange: true)
-                    .AddEnvironmentVariables();
+                    .AddJsonFile("local.settings.json", optional: false, reloadOnChange: true);
+                    //.AddEnvironmentVariables();
                 })
                 .Build();
 
