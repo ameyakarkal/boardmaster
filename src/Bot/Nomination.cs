@@ -31,7 +31,7 @@ public class Nomination
 
     [Function("Nomination_WebHook")]
     public HttpResponseData NominationWebHook(
-        [HttpTrigger(AuthorizationLevel.Function,  "post", Route = "nomination")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "nomination")] HttpRequestData req)
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
