@@ -1,24 +1,28 @@
-﻿using Bot.Domain;
+﻿using System.Threading.Tasks;
+using Bot.Domain;
 
 namespace Bot.Handlers
 {
     public class NominationHandler
     {
-        private readonly BoardMaster _boardMaster;
-        
+        private readonly IPersistence _persistence;
         private readonly Messenger _messenger;
 
-        public NominationHandler(BoardMaster boardMaster, Messenger messenger)
+        public NominationHandler(IPersistence persistence, Messenger messenger)
         {
-            _boardMaster = boardMaster;
+            _persistence = persistence;
             _messenger = messenger;
         }
 
-        public HandlerResponse<Notification> Handle()
+        public async Task<HandlerResponse<Notification>> Handle()
         {
-            var nominee = _boardMaster.Pick();
+            var boardMaster = await BoardMaster.Get(_persistence);
+
+            var nominee = boardMaster.Pick();
 
             var notification = _messenger.Nudge(nominee);
+
+            await boardMaster.Save(_persistence);
 
             return new HandlerResponse<Notification>(notification);
         }

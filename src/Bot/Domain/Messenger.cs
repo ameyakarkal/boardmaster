@@ -4,6 +4,6 @@ public class Messenger
 {    
     public Notification Nudge(TeamMember member)
     {
-        return null;
+        return new Notification(member.AboutMarkDown, member.Name);
     }
 }
