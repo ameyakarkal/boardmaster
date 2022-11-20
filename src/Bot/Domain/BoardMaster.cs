@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Azure;
 using Azure.Data.Tables;
 
@@ -7,6 +8,10 @@ namespace Bot.Domain;
 public class BoardMaster
 {
     private readonly BoardMasterState _state;
+
+    public BoardMaster()
+    {
+    }
 
     public BoardMaster(BoardMasterState state)
     {
@@ -17,21 +22,35 @@ public class BoardMaster
     {
         var teamSize = Team.TeamMembers.Count;
 
-        var index = _state.TeamMemberIndex + 1 >= teamSize
-                ? 0
-                : _state.TeamMemberIndex + 1;
+        _state.TeamMemberIndex = _state.TeamMemberIndex + 1 >= teamSize ? 0 : _state.TeamMemberIndex + 1;
 
-        // persist index
+        return Team.TeamMembers[_state.TeamMemberIndex];
+    }
 
-        return Team.TeamMembers[index];
+
+    public static async Task<BoardMaster> Get(IPersistence persistence)
+    {
+        var state = await persistence.Fetch<BoardMaster.BoardMasterState>(BoardMaster.BoardMasterState.DefaultPartitionKey, BoardMaster.BoardMasterState.DefaultRowKey);
+
+        return new BoardMaster(
+            state ?? new BoardMasterState { PartitionKey = BoardMaster.BoardMasterState.DefaultPartitionKey , RowKey = BoardMaster.BoardMasterState.DefaultRowKey });
+    }
+
+
+    public async Task<BoardMaster> Save(IPersistence persistence)
+    {
+        await persistence.Store(_state);
+
+        return this;
     }
 
     public class BoardMasterState : ITableEntity
     {
+        public const string DefaultRowKey = "1";
+        public const string DefaultPartitionKey = "1";
+
         public BoardMasterState()
         {
-            RowKey = "1";
-            PartitionKey = "1";
             Timestamp = DateTimeOffset.UtcNow;
         }
 
