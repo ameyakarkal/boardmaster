@@ -21,16 +21,17 @@ public class Nomination
         _logger = loggerFactory.CreateLogger<Nomination>();
     }
 
-    [Function("Nomination")]
-    public Notification Run([TimerTrigger("0 */5 * * * *")] ScheduleDto myTimer)
+    [Function("Nomination_Timer")]
+    public Notification NominationTimer([TimerTrigger("0 */5 * * * *")] ScheduleDto myTimer)
     {
         var result = _nominationHandler.Handle();
 
         return result.Result;
     }
 
-    [Function("NominateWebhook")]
-    public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
+    [Function("Nomination_WebHook")]
+    public HttpResponseData NominationWebHook(
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "nomination")] HttpRequestData req)
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -38,8 +39,6 @@ public class Nomination
 
         var response = req.CreateResponse(HttpStatusCode.OK);
 
-        response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
-        
         response.WriteAsJsonAsync(result);
 
         return response;

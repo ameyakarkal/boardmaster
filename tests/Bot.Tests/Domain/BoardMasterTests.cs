@@ -7,7 +7,7 @@ public class BoardMasterTests
     [Fact]
     public void ShouldPickTeamMember()
     {
-        var bm = new BoardMaster();
+        var bm = new BoardMaster(new BoardMaster.BoardMasterState());
         Assert.NotNull(bm.Pick());
     }
 }
