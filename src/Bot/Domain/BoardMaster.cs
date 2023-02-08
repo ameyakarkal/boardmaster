@@ -27,19 +27,26 @@ public class BoardMaster
         return Team.TeamMembers[_state.TeamMemberIndex];
     }
 
+    public BoardMasterState State => _state;
+
 
     public static async Task<BoardMaster> Get(IPersistence persistence)
     {
-        var state = await persistence.Fetch<BoardMaster.BoardMasterState>(BoardMaster.BoardMasterState.DefaultPartitionKey, BoardMaster.BoardMasterState.DefaultRowKey);
+        var state = await persistence.Fetch<BoardMaster.BoardMasterState>(
+            BoardMaster.BoardMasterState.DefaultPartitionKey,
+            BoardMaster.BoardMasterState.DefaultRowKey);
 
         return new BoardMaster(
-            state ?? new BoardMasterState { PartitionKey = BoardMaster.BoardMasterState.DefaultPartitionKey , RowKey = BoardMaster.BoardMasterState.DefaultRowKey });
+            state ?? new BoardMasterState
+            {
+                PartitionKey = BoardMaster.BoardMasterState.DefaultPartitionKey,
+                RowKey = BoardMaster.BoardMasterState.DefaultRowKey
+            });
     }
-
 
     public async Task<BoardMaster> Save(IPersistence persistence)
     {
-        await persistence.Store(_state);
+        await persistence.Store(State);
 
         return this;
     }
@@ -58,7 +65,6 @@ public class BoardMaster
         public string RowKey { get; set; }
         public DateTimeOffset? Timestamp { get; set; }
         public ETag ETag { get; set; }
-
         public int TeamMemberIndex { get; set; }
     }
 }

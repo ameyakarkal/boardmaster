@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Azure.Data.Tables;
 using Bot.Domain;
-using Bot.Handlers;
 using Bot.State;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,8 +31,7 @@ namespace Bot
                         .AddSingleton<IPersistence>(persistenceService)
                         .AddTransient<BoardMaster>()
                         .AddTransient<Messenger>()
-                        .AddTransient<Nomination>()
-                        .AddTransient<NominationHandler>();
+                        .AddTransient<Nomination>();
 
                 })
                 .Build();
