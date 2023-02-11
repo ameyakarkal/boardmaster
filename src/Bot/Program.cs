@@ -7,35 +7,38 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Bot
+namespace Bot;
+
+public class Program
 {
-    public class Program
+    public static void Main()
     {
-        public static void Main()
-        {
-            var host = new HostBuilder()
-                .ConfigureFunctionsWorkerDefaults()
-                .ConfigureAppConfiguration(conf =>
-                {
-                    conf.SetBasePath(Directory.GetCurrentDirectory())
+        var host = new HostBuilder()
+            .ConfigureFunctionsWorkerDefaults()
+            .ConfigureAppConfiguration(conf =>
+            {
+                conf.SetBasePath(Directory.GetCurrentDirectory())
                     .AddJsonFile("local.settings.json", optional: false, reloadOnChange: true)
                     .AddEnvironmentVariables();
-                })
-                .ConfigureServices(service =>
-                {
-                    var persistenceService = new Persistence(
-                        new TableServiceClient(
-                            Environment.GetEnvironmentVariable("StorageAccountConnectionString")));
+            })
+            .ConfigureServices(service =>
+            {
+                var persistenceService = new Persistence(
+                    new TableServiceClient(
+                        Environment.GetEnvironmentVariable("StorageAccountConnectionString")));
 
-                    service
-                        .AddSingleton<IPersistence>(persistenceService)
-                        .AddTransient<BoardMaster>()
-                        .AddTransient<Messenger>()
-                        .AddTransient<Nomination>();
+                var boardMaster = BoardMaster
+                    .GetInstance(persistenceService)
+                    .GetAwaiter().GetResult();
 
-                })
-                .Build();
-            host.Run();
-        }
+                service
+                    .AddSingleton(boardMaster)
+                    .AddSingleton<IPersistence>(persistenceService)
+                    .AddTransient<Messenger>()
+                    .AddTransient<Nomination>();
+
+            })
+            .Build();
+        host.Run();
     }
 }

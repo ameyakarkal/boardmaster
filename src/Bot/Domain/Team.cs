@@ -5,6 +5,10 @@ namespace Bot.Domain;
 
 public class Team
 {
+    public record TeamMember(
+        string Name,
+        string AboutMarkDown = "Apparently, this user prefers to keep an air of mystery about them.");
+
     static Team()
     {
         TeamMembers = SuicideSquad().ToList();

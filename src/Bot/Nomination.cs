@@ -1,7 +1,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using Bot.Domain;
-using Bot.Dtos;
+using Bot.State;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -12,16 +12,15 @@ public class Nomination
 {
     private readonly IPersistence _persistence;
     private readonly Messenger _messenger;
-    private readonly ILogger _logger;
+    private readonly ILogger<Nomination> _logger;
+    private readonly BoardMaster _boardMaster;
 
     public Nomination(
-        ILoggerFactory loggerFactory,
-        IPersistence persistence,
-        Messenger messenger)
+        ILogger<Nomination> logger, BoardMaster boardMaster, Messenger messenger)
     {
-        _persistence = persistence;
         _messenger = messenger;
-        _logger = loggerFactory.CreateLogger<Nomination>();
+        _logger = logger;
+        _boardMaster = boardMaster;
     }
 
     [Function("Nomination_Timer")]
@@ -57,13 +56,9 @@ public class Nomination
 
     public async Task<HandlerResponse<Notification>> Handle()
     {
-        var boardMaster = await BoardMaster.Get(_persistence);
-
-        var nominee = boardMaster.Pick();
+        var nominee = await _boardMaster.Pick();
 
         var notification = _messenger.Nudge(nominee);
-
-        await boardMaster.Save(_persistence);
 
         return new HandlerResponse<Notification>(notification);
     }
