@@ -2,7 +2,7 @@
 
 public class Messenger
 {    
-    public Notification Nudge(TeamMember member)
+    public Notification Nudge(Team.TeamMember member)
     {
         return new Notification(member.AboutMarkDown, member.Name);
     }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Azure.Data.Tables;
-using Bot.Domain;
 
 namespace Bot.State;
 

@@ -1,7 +1,7 @@
-﻿using Azure.Data.Tables;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Azure.Data.Tables;
 
-namespace Bot.Domain
+namespace Bot.State
 {
     public interface IPersistence
     {

@@ -1,8 +1,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using Bot.Domain;
-using Bot.Dtos;
-using Bot.Handlers;
+using Bot.State;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -11,21 +10,30 @@ namespace Bot;
 
 public class Nomination
 {
-    private readonly NominationHandler _nominationHandler;
-    private readonly ILogger _logger;
+    private readonly IPersistence _persistence;
+    private readonly Messenger _messenger;
+    private readonly ILogger<Nomination> _logger;
+    private readonly BoardMaster _boardMaster;
 
     public Nomination(
-        ILoggerFactory loggerFactory,
-        NominationHandler nominationHandler)
+        ILogger<Nomination> logger, BoardMaster boardMaster, Messenger messenger)
     {
-        _nominationHandler = nominationHandler;
-        _logger = loggerFactory.CreateLogger<Nomination>();
+        _messenger = messenger;
+        _logger = logger;
+        _boardMaster = boardMaster;
     }
 
     [Function("Nomination_Timer")]
-    public async Task<Notification> NominationTimer([TimerTrigger("0 */5 * * * *")] ScheduleDto myTimer)
+    public async Task<Notification> NominationTimer(
+        [TimerTrigger("0 */5 * * * *"
+#if DEBUG
+        ,RunOnStartup = true
+#endif
+        )] object myTimer)
     {
-        var result = await _nominationHandler.Handle();
+        _ = myTimer;
+
+        var result = await Handle();
 
         return result.Result;
     }
@@ -36,12 +44,22 @@ public class Nomination
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var result = await _nominationHandler.Handle();
+        var result = await Handle();
 
         var response = req.CreateResponse(HttpStatusCode.OK);
 
         await response.WriteAsJsonAsync(result);
 
         return response;
+    }
+
+
+    public async Task<HandlerResponse<Notification>> Handle()
+    {
+        var nominee = await _boardMaster.Pick();
+
+        var notification = _messenger.Nudge(nominee);
+
+        return new HandlerResponse<Notification>(notification);
     }
 }
